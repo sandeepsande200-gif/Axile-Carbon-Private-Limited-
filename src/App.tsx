@@ -25,7 +25,11 @@ import {
   FileText,
   TreePine,
   Car,
-  Calendar
+  Calendar,
+  ChevronDown,
+  Plus,
+  Minus,
+  HelpCircle
 } from 'lucide-react';
 
 // --- Components ---
@@ -68,7 +72,7 @@ const Navbar = () => {
           <a href="#services" className="hover:text-fresh transition-colors">Services</a>
           <a href="#process" className="hover:text-fresh transition-colors">Process</a>
           <a href="#impact" className="hover:text-fresh transition-colors">Impact</a>
-          <a href="#about" className="hover:text-fresh transition-colors">About</a>
+          <a href="#faq" className="hover:text-fresh transition-colors">FAQ</a>
           <a href="#contact" className="hover:text-fresh transition-colors">Contact</a>
         </div>
         <button 
@@ -1250,6 +1254,118 @@ const CTASection = () => {
   );
 };
 
+const FAQ = () => {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  const faqs = [
+    {
+      question: "What exactly are carbon credits?",
+      answer: "Carbon credits are tradable certificates representing the removal or avoidance of one metric ton of carbon dioxide (CO2) from the atmosphere. By generating solar power, your plant avoids carbon emissions that would have otherwise come from fossil fuels."
+    },
+    {
+      question: "Is there any upfront cost to join Axial Carbon?",
+      answer: "No. We operate on a success-based revenue sharing model. We handle all the registration, auditing, and verification costs. We only earn when your carbon credits are successfully sold."
+    },
+    {
+      question: "How much can I realistically earn?",
+      answer: "Earnings depend on your plant's capacity and actual generation. Typically, a 100kW plant can generate significant additional revenue annually. Use our Carbon Earnings Calculator above for a personalized estimate."
+    },
+    {
+      question: "How long does the verification process take?",
+      answer: "The initial registration and first verification cycle usually take 6-9 months. Subsequent annual verifications are typically faster. We handle all the complex paperwork during this period."
+    },
+    {
+      question: "Do I need to install any additional hardware on my solar plant?",
+      answer: "In most cases, no. We can usually pull the required generation data directly from your existing solar inverter's monitoring portal or smart meters."
+    },
+    {
+      question: "Which registries do you use for registration?",
+      answer: "We register projects with globally recognized premium registries like Verra (VCS), Gold Standard, and GCC, as well as reputable Indian registries, ensuring your credits fetch the highest market prices."
+    },
+    {
+      question: "What is the minimum plant size required?",
+      answer: "While individual registries often have high minimums, Axial Carbon aggregates multiple smaller plants (starting from 50kW-100kW) into a single large project, making it viable for smaller C&I consumers to participate."
+    }
+  ];
+
+  return (
+    <section id="faq" className="py-32 bg-white/30 relative overflow-hidden">
+      <div className="max-w-4xl mx-auto px-6 md:px-12 relative z-10">
+        <div className="text-center mb-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-fresh/10 border border-fresh/20 text-forest text-sm font-bold mb-6"
+          >
+            <HelpCircle size={16} />
+            <span>Common Questions</span>
+          </motion.div>
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-4xl md:text-5xl font-extrabold text-forest mb-6"
+          >
+            Frequently Asked <span className="text-gradient">Questions</span>
+          </motion.h2>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-forest/70 text-lg font-medium max-w-2xl mx-auto"
+          >
+            Everything you need to know about unlocking the hidden value of your solar plant.
+          </motion.p>
+        </div>
+
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.05 }}
+              className="glass-panel rounded-2xl overflow-hidden border border-forest/5"
+            >
+              <button
+                onClick={() => setActiveIndex(activeIndex === index ? null : index)}
+                className="w-full px-6 py-5 flex items-center justify-between text-left hover:bg-fresh/5 transition-colors group"
+              >
+                <span className="text-lg font-bold text-forest group-hover:text-fresh transition-colors">
+                  {faq.question}
+                </span>
+                <div className={`p-2 rounded-full transition-all duration-300 ${activeIndex === index ? 'bg-forest text-white rotate-180' : 'bg-fresh/10 text-forest'}`}>
+                  <ChevronDown size={20} />
+                </div>
+              </button>
+              <AnimatePresence>
+                {activeIndex === index && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-6 pb-6 text-forest/80 font-medium leading-relaxed border-t border-forest/5 pt-4">
+                      {faq.answer}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const Contact = () => {
   return (
     <section id="contact" className="py-32 relative bg-white/40 backdrop-blur-sm">
@@ -1438,6 +1554,7 @@ export default function App() {
         <Testimonial />
         <CarbonAssessment />
         <CTASection />
+        <FAQ />
         <Contact />
       </main>
       <Footer />
