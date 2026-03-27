@@ -12,6 +12,10 @@
   --color-white: #FFFFFF;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--color-earth);

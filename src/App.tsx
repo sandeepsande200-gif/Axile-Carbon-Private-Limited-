@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
+import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
 import { 
   Leaf, 
   Sun, 
@@ -30,65 +30,23 @@ import {
 
 // --- Components ---
 
-const CustomCursor = () => {
-  const cursorX = useMotionValue(-100);
-  const cursorY = useMotionValue(-100);
-  
-  const springConfig = { damping: 30, stiffness: 250, mass: 0.5 };
-  const x = useSpring(cursorX, springConfig);
-  const y = useSpring(cursorY, springConfig);
-  
-  const [isHovering, setIsHovering] = useState(false);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      cursorX.set(e.clientX - 12);
-      cursorY.set(e.clientY - 12);
-    };
-
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.tagName === 'BUTTON' || 
-        target.tagName === 'A' || 
-        target.closest('button') || 
-        target.closest('a') ||
-        target.classList.contains('interactive-text')
-      ) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseover', handleMouseOver);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseover', handleMouseOver);
-    };
-  }, [cursorX, cursorY]);
-
-  return (
-    <motion.div
-      className="fixed top-0 left-0 w-6 h-6 rounded-full border-2 border-fresh pointer-events-none z-[9999] hidden md:block will-change-transform"
-      style={{
-        x,
-        y,
-        scale: isHovering ? 2.5 : 1,
-        backgroundColor: isHovering ? 'rgba(102, 187, 106, 0.1)' : 'transparent',
-      }}
-    />
-  );
-};
-
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    let timeoutId: number | null = null;
+    const handleScroll = () => {
+      if (timeoutId) return;
+      timeoutId = window.setTimeout(() => {
+        setScrolled(window.scrollY > 50);
+        timeoutId = null;
+      }, 100);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   return (
@@ -184,16 +142,16 @@ const CalculatorModal = ({ isOpen, onClose }: { isOpen: boolean; onClose: () => 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
             onClick={onClose}
             className="absolute inset-0 bg-forest/40 backdrop-blur-sm"
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 40 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 40 }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className="relative w-full max-w-2xl bg-white/90 backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden border border-white/50 z-10"
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="relative w-full max-w-2xl bg-white/95 backdrop-blur-md rounded-[2rem] shadow-2xl overflow-hidden border border-white/50 z-10 will-change-transform"
           >
             <div className="p-8 md:p-10">
               <button
@@ -380,9 +338,9 @@ const Hero = () => {
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 text-center">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="max-w-4xl mx-auto"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel text-sm font-medium text-forest mb-8">
@@ -500,8 +458,8 @@ const Services = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className="md:col-span-2 glass-panel p-10 rounded-[2rem] group hover:shadow-2xl hover:shadow-fresh/10 transition-all duration-500 overflow-hidden relative"
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="md:col-span-2 glass-panel p-10 rounded-[2rem] group hover:shadow-2xl hover:shadow-fresh/10 transition-all duration-500 overflow-hidden relative will-change-transform"
           >
             <div className="absolute top-0 right-0 w-64 h-64 bg-fresh/10 rounded-full mix-blend-multiply filter blur-3xl group-hover:scale-150 transition-transform duration-700" />
             <div className="relative z-10">
@@ -531,8 +489,8 @@ const Services = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1.2, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="glass-panel p-10 rounded-[2rem] group hover:shadow-2xl hover:shadow-fresh/10 transition-all duration-500 relative overflow-hidden flex flex-col justify-between"
+            transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="glass-panel p-10 rounded-[2rem] group hover:shadow-2xl hover:shadow-fresh/10 transition-all duration-500 relative overflow-hidden flex flex-col justify-between will-change-transform"
           >
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-sky/20 rounded-full mix-blend-multiply filter blur-2xl group-hover:scale-150 transition-transform duration-700" />
             <div className="relative z-10">
@@ -555,8 +513,8 @@ const Services = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1.2, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="glass-panel p-10 rounded-[2rem] group hover:shadow-2xl hover:shadow-fresh/10 transition-all duration-500 relative overflow-hidden"
+            transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            className="glass-panel p-10 rounded-[2rem] group hover:shadow-2xl hover:shadow-fresh/10 transition-all duration-500 relative overflow-hidden will-change-transform"
           >
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-earth/40 rounded-full mix-blend-multiply filter blur-2xl group-hover:scale-150 transition-transform duration-700" />
             <div className="relative z-10">
@@ -579,8 +537,8 @@ const Services = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1.2, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="md:col-span-2 bg-forest p-10 rounded-[2rem] text-white group hover:shadow-2xl hover:shadow-forest/20 transition-all duration-500 overflow-hidden relative"
+            transition={{ duration: 0.6, delay: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="md:col-span-2 bg-forest p-10 rounded-[2rem] text-white group hover:shadow-2xl hover:shadow-forest/20 transition-all duration-500 overflow-hidden relative will-change-transform"
           >
             <div className="absolute top-1/2 right-0 w-80 h-80 bg-fresh/20 rounded-full mix-blend-screen filter blur-3xl -translate-y-1/2 group-hover:scale-125 transition-transform duration-700" />
             <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
@@ -679,8 +637,8 @@ const Process = () => {
                     initial={{ opacity: 0, scale: 0.9, y: 40 }}
                     whileInView={{ opacity: 1, scale: 1, y: 0 }}
                     viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 1.5, delay: index * 0.2, ease: [0.22, 1, 0.36, 1] }}
-                    className="flex flex-col items-center text-center relative"
+                    transition={{ duration: 0.6, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                    className="flex flex-col items-center text-center relative will-change-transform"
                   >
                     <div className="w-16 h-16 rounded-full glass-panel flex items-center justify-center text-xl font-bold text-forest mb-6 relative z-10 shadow-lg shadow-forest/5">
                       0{index + 1}
@@ -712,10 +670,11 @@ const Process = () => {
               className="absolute inset-0 bg-forest/80 backdrop-blur-sm cursor-pointer"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.98, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-4xl bg-white rounded-[2rem] shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col"
+              exit={{ opacity: 0, scale: 0.98, y: 10 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="relative w-full max-w-4xl bg-white rounded-[2rem] shadow-2xl overflow-hidden z-10 max-h-[90vh] flex flex-col will-change-transform"
             >
               <div className="p-8 md:p-10 overflow-y-auto">
                 <button 
@@ -774,7 +733,7 @@ const Impact = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               className="text-center"
             >
               <motion.div 
@@ -792,7 +751,7 @@ const Impact = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 1.2, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
               className="text-center"
             >
               <motion.div 
@@ -810,7 +769,7 @@ const Impact = () => {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 1.2, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.6, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="text-center"
             >
               <motion.div 
@@ -839,8 +798,8 @@ const About = () => {
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative"
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="relative will-change-transform"
           >
             {/* Abstract Axis Visual */}
             <div className="aspect-square rounded-full border border-forest/10 relative flex items-center justify-center p-8">
@@ -859,7 +818,8 @@ const About = () => {
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="glass-panel p-8 md:p-10 rounded-3xl will-change-transform"
           >
             <motion.h2 
               className="text-3xl md:text-5xl font-extrabold mb-6 drop-shadow-sm cursor-default"
@@ -986,10 +946,10 @@ const CarbonAssessment = () => {
             {step === 'intro' && (
               <motion.div 
                 key="intro"
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -40 }}
-                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="flex flex-col items-center text-center my-auto"
               >
                 <motion.div 
@@ -1080,7 +1040,7 @@ const CarbonAssessment = () => {
                           strokeDasharray="283"
                           initial={{ strokeDashoffset: 283 }}
                           animate={{ strokeDashoffset: 283 - (283 * totalScore) / 100 }}
-                          transition={{ duration: 1.5, ease: "easeOut" }}
+                          transition={{ duration: 0.8, ease: "easeOut" }}
                           className={result.color}
                         />
                       </svg>
@@ -1236,11 +1196,11 @@ const CTASection = () => {
           </div>
           
             <motion.div 
-              initial={{ opacity: 0, y: 40 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-              className="glass-panel p-8 md:p-10 rounded-3xl"
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="glass-panel p-8 md:p-10 rounded-3xl will-change-transform"
             >
             <form className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
@@ -1311,8 +1271,8 @@ const Contact = () => {
             initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-            className="glass-panel p-10 rounded-[2rem] space-y-8 flex flex-col justify-center"
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="glass-panel p-10 rounded-[2rem] space-y-8 flex flex-col justify-center will-change-transform"
           >
             <h3 className="text-2xl font-bold text-forest mb-2">Contact Information</h3>
             
@@ -1370,8 +1330,8 @@ const Contact = () => {
             initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-            className="h-full min-h-[400px] rounded-[2rem] overflow-hidden shadow-xl shadow-forest/10 border border-forest/10"
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="h-full min-h-[400px] rounded-[2rem] overflow-hidden shadow-xl shadow-forest/10 border border-forest/10 will-change-transform"
           >
             <iframe 
               src="https://maps.google.com/maps?q=Navale%20Icon,%20near%20Navale%20Bridge,%20Narhe,%20Pune,%20Maharashtra%20411041&t=&z=15&ie=UTF8&iwloc=&output=embed" 
@@ -1467,7 +1427,6 @@ export default function App() {
       {/* Floating Particles */}
       <Particles />
 
-      <CustomCursor />
       <Navbar />
       <main>
         <Hero />
