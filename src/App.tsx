@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'motion/react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { motion, useScroll, useTransform, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
 import { 
   Leaf, 
   Sun, 
@@ -31,12 +31,19 @@ import {
 // --- Components ---
 
 const CustomCursor = () => {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
+  
+  const springConfig = { damping: 30, stiffness: 250, mass: 0.5 };
+  const x = useSpring(cursorX, springConfig);
+  const y = useSpring(cursorY, springConfig);
+  
   const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
+      cursorX.set(e.clientX - 12);
+      cursorY.set(e.clientY - 12);
     };
 
     const handleMouseOver = (e: MouseEvent) => {
@@ -60,18 +67,17 @@ const CustomCursor = () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseover', handleMouseOver);
     };
-  }, []);
+  }, [cursorX, cursorY]);
 
   return (
     <motion.div
-      className="fixed top-0 left-0 w-6 h-6 rounded-full border-2 border-fresh pointer-events-none z-[9999] hidden md:block"
-      animate={{
-        x: position.x - 12,
-        y: position.y - 12,
+      className="fixed top-0 left-0 w-6 h-6 rounded-full border-2 border-fresh pointer-events-none z-[9999] hidden md:block will-change-transform"
+      style={{
+        x,
+        y,
         scale: isHovering ? 2.5 : 1,
         backgroundColor: isHovering ? 'rgba(102, 187, 106, 0.1)' : 'transparent',
       }}
-      transition={{ type: 'spring', damping: 30, stiffness: 250, mass: 0.5 }}
     />
   );
 };
@@ -119,26 +125,28 @@ const Navbar = () => {
 };
 
 const Particles = () => {
-  // Generate 35 particles with random positions, sizes, and animation durations
-  const particles = Array.from({ length: 35 }).map((_, i) => {
-    const size = Math.random() * 4 + 2; // 2px to 6px
-    return {
-      id: i,
-      left: `${Math.random() * 100}%`,
-      size: `${size}px`,
-      duration: `${Math.random() * 20 + 20}s`, // 20s to 40s
-      delay: `-${Math.random() * 40}s`, // Negative delay so they are already on screen
-      opacity: Math.random() * 0.3 + 0.1, // 0.1 to 0.4
-      xDrift: `${(Math.random() - 0.5) * 100}px`, // -50px to 50px drift
-    };
-  });
+  // Memoize particles to prevent re-generation on every render
+  const particles = useMemo(() => {
+    return Array.from({ length: 25 }).map((_, i) => {
+      const size = Math.random() * 4 + 2; // 2px to 6px
+      return {
+        id: i,
+        left: `${Math.random() * 100}%`,
+        size: `${size}px`,
+        duration: `${Math.random() * 20 + 20}s`, // 20s to 40s
+        delay: `-${Math.random() * 40}s`, // Negative delay so they are already on screen
+        opacity: Math.random() * 0.3 + 0.1, // 0.1 to 0.4
+        xDrift: `${(Math.random() - 0.5) * 100}px`, // -50px to 50px drift
+      };
+    });
+  }, []);
 
   return (
     <div className="fixed inset-0 z-[-45] overflow-hidden pointer-events-none">
       {particles.map((p) => (
         <div
           key={p.id}
-          className="absolute rounded-full bg-white animate-float-particle"
+          className="absolute rounded-full bg-white animate-float-particle will-change-transform"
           style={{
             left: p.left,
             width: p.size,
@@ -383,7 +391,6 @@ const Hero = () => {
           </div>
           
           <motion.h1 
-            whileHover={{ scale: 1.02 }}
             className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-8 leading-[1.1] drop-shadow-sm cursor-default"
           >
             Turn Your Solar Plant Into a <br className="hidden md:block" /> <span className="text-gradient">Passive Revenue Stream</span>
@@ -478,7 +485,6 @@ const Services = () => {
             <Zap size={16} /> Our Solutions
           </div>
           <motion.h2 
-            whileHover={{ scale: 1.02 }}
             className="text-4xl md:text-6xl font-extrabold mb-6 drop-shadow-sm text-forest cursor-default"
           >
             End-to-End Carbon <span className="text-gradient">Monetization</span>
@@ -500,14 +506,9 @@ const Services = () => {
             <div className="absolute top-0 right-0 w-64 h-64 bg-fresh/10 rounded-full mix-blend-multiply filter blur-3xl group-hover:scale-150 transition-transform duration-700" />
             <div className="relative z-10">
               <motion.div 
-                whileInView={{ scale: [1, 1.05, 1], y: [0, -5, 0] }}
-                whileHover={{ scale: 1.2, rotate: 5 }}
-                transition={{ 
-                  whileInView: { duration: 2, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" },
-                  whileHover: { duration: 0.2 }
-                }}
-                viewport={{ once: false, amount: 0.5 }}
-                className="w-16 h-16 rounded-2xl bg-forest text-white flex items-center justify-center mb-8 shadow-lg cursor-pointer"
+                whileHover={{ scale: 1.15, rotate: 5 }}
+                transition={{ duration: 0.2 }}
+                className="w-16 h-16 rounded-2xl bg-forest text-white flex items-center justify-center mb-8 shadow-lg cursor-pointer will-change-transform"
               >
                 <BarChart3 size={32} />
               </motion.div>
@@ -536,11 +537,9 @@ const Services = () => {
             <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-sky/20 rounded-full mix-blend-multiply filter blur-2xl group-hover:scale-150 transition-transform duration-700" />
             <div className="relative z-10">
               <motion.div 
-                whileInView={{ scale: [1, 1.05, 1], y: [0, -5, 0] }}
-                whileHover={{ scale: 1.2, rotate: -5 }}
-                transition={{ duration: 2, delay: 0.2, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
-                viewport={{ once: false, amount: 0.5 }}
-                className="w-14 h-14 rounded-2xl bg-sky text-forest flex items-center justify-center mb-6 cursor-pointer"
+                whileHover={{ scale: 1.15, rotate: -5 }}
+                transition={{ duration: 0.2 }}
+                className="w-14 h-14 rounded-2xl bg-sky text-forest flex items-center justify-center mb-6 cursor-pointer will-change-transform"
               >
                 <ClipboardList size={28} />
               </motion.div>
@@ -562,11 +561,9 @@ const Services = () => {
             <div className="absolute -top-10 -left-10 w-40 h-40 bg-earth/40 rounded-full mix-blend-multiply filter blur-2xl group-hover:scale-150 transition-transform duration-700" />
             <div className="relative z-10">
               <motion.div 
-                whileInView={{ scale: [1, 1.05, 1], y: [0, -5, 0] }}
-                whileHover={{ scale: 1.2, rotate: 5 }}
-                transition={{ duration: 2, delay: 0.4, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
-                viewport={{ once: false, amount: 0.5 }}
-                className="w-14 h-14 rounded-2xl bg-earth text-forest flex items-center justify-center mb-6 cursor-pointer"
+                whileHover={{ scale: 1.15, rotate: 5 }}
+                transition={{ duration: 0.2 }}
+                className="w-14 h-14 rounded-2xl bg-earth text-forest flex items-center justify-center mb-6 cursor-pointer will-change-transform"
               >
                 <Globe size={28} />
               </motion.div>
@@ -589,11 +586,9 @@ const Services = () => {
             <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center justify-between">
               <div className="max-w-xl">
                 <motion.div 
-                  whileInView={{ scale: [1, 1.05, 1], y: [0, -5, 0] }}
-                  whileHover={{ scale: 1.2, rotate: -5 }}
-                  transition={{ duration: 2, delay: 0.6, ease: "easeInOut", repeat: Infinity, repeatType: "reverse" }}
-                  viewport={{ once: false, amount: 0.5 }}
-                  className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md text-fresh flex items-center justify-center mb-8 border border-white/10 cursor-pointer"
+                  whileHover={{ scale: 1.15, rotate: -5 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md text-fresh flex items-center justify-center mb-8 border border-white/10 cursor-pointer will-change-transform"
                 >
                   <Coins size={32} />
                 </motion.div>
@@ -767,7 +762,6 @@ const Impact = () => {
           
           <div className="text-center max-w-2xl mx-auto mb-16 relative z-10">
             <motion.h2 
-              whileHover={{ scale: 1.02 }}
               className="text-3xl md:text-5xl font-extrabold mb-6 drop-shadow-sm cursor-default"
             >
               Measurable <span className="text-gradient">Impact</span>
@@ -784,15 +778,11 @@ const Impact = () => {
               className="text-center"
             >
               <motion.div 
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                className="w-16 h-16 mx-auto rounded-full bg-leaf flex items-center justify-center text-forest mb-6 cursor-pointer"
+                whileHover={{ scale: 1.15, rotate: 5 }}
+                transition={{ duration: 0.2 }}
+                className="w-16 h-16 mx-auto rounded-full bg-leaf flex items-center justify-center text-forest mb-6 cursor-pointer will-change-transform"
               >
-                <motion.div
-                  whileInView={{ y: [0, -4, 0], rotate: [0, 5, -5, 0] }}
-                  transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-                >
-                  <Leaf size={28} />
-                </motion.div>
+                <Leaf size={28} />
               </motion.div>
               <div className="text-5xl md:text-6xl font-extrabold text-forest mb-2 drop-shadow-sm">50+</div>
               <div className="text-sm font-bold text-forest/80 uppercase tracking-widest">MW Solar Capacity Managed</div>
@@ -806,15 +796,11 @@ const Impact = () => {
               className="text-center"
             >
               <motion.div 
-                whileHover={{ scale: 1.1, rotate: -5 }}
-                className="w-16 h-16 mx-auto rounded-full bg-leaf flex items-center justify-center text-forest mb-6 cursor-pointer"
+                whileHover={{ scale: 1.15, rotate: -5 }}
+                transition={{ duration: 0.2 }}
+                className="w-16 h-16 mx-auto rounded-full bg-leaf flex items-center justify-center text-forest mb-6 cursor-pointer will-change-transform"
               >
-                <motion.div
-                  whileInView={{ scale: [1, 1.08, 1], rotate: [0, 10, 0] }}
-                  transition={{ repeat: Infinity, duration: 8, ease: "easeInOut" }}
-                >
-                  <Leaf size={28} />
-                </motion.div>
+                <Leaf size={28} />
               </motion.div>
               <div className="text-5xl md:text-6xl font-extrabold text-forest mb-2 drop-shadow-sm">100K+</div>
               <div className="text-sm font-bold text-forest/80 uppercase tracking-widest">Carbon Credits Generated</div>
@@ -829,14 +815,10 @@ const Impact = () => {
             >
               <motion.div 
                 whileHover={{ scale: 1.1, rotate: 5 }}
-                className="w-16 h-16 mx-auto rounded-full bg-leaf flex items-center justify-center text-forest mb-6 cursor-pointer"
+                transition={{ duration: 0.2 }}
+                className="w-16 h-16 mx-auto rounded-full bg-leaf flex items-center justify-center text-forest mb-6 cursor-pointer will-change-transform"
               >
-                <motion.div
-                  whileInView={{ y: [0, 3, 0], rotate: [0, -8, 0] }}
-                  transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
-                >
-                  <Globe size={28} />
-                </motion.div>
+                <Globe size={28} />
               </motion.div>
               <div className="text-5xl md:text-6xl font-extrabold text-forest mb-2 drop-shadow-sm">$2M+</div>
               <div className="text-sm font-bold text-forest/80 uppercase tracking-widest">Extra Revenue Unlocked</div>
@@ -880,7 +862,6 @@ const About = () => {
             transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
           >
             <motion.h2 
-              whileHover={{ scale: 1.02 }}
               className="text-3xl md:text-5xl font-extrabold mb-6 drop-shadow-sm cursor-default"
             >
               Unlocking the Hidden Value of <br/><span className="text-gradient">C&I Solar</span>
@@ -911,13 +892,13 @@ const Testimonial = () => {
   return (
     <section className="py-32 relative">
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95, y: 30 }}
-          whileInView={{ opacity: 1, scale: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-4xl mx-auto text-center glass-panel p-12 md:p-16 rounded-[3rem] hover:-translate-y-2 hover:shadow-[0_15px_40px_-10px_rgba(102,187,106,0.4)] transition-all duration-300 ease-in-out"
-        >
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.98, y: 20 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-4xl mx-auto text-center glass-panel p-12 md:p-16 rounded-[3rem] hover:shadow-[0_15px_40px_-10px_rgba(102,187,106,0.2)] transition-all duration-300 ease-in-out will-change-transform"
+          >
           <div className="mb-8 flex justify-center text-fresh">
             {[1, 2, 3, 4, 5].map(i => (
               <svg key={i} className="w-6 h-6 fill-current" viewBox="0 0 24 24">
@@ -993,7 +974,6 @@ const CarbonAssessment = () => {
       <div className="max-w-4xl mx-auto px-6 md:px-12 relative z-10">
         <div className="text-center mb-12">
           <motion.h2 
-            whileHover={{ scale: 1.02 }}
             className="text-3xl md:text-5xl font-extrabold mb-6 drop-shadow-sm cursor-default"
           >
             Free Solar Carbon <span className="text-gradient">Analysis</span>
@@ -1219,7 +1199,6 @@ const CTASection = () => {
         <div className="grid lg:grid-cols-2 gap-16">
           <div>
             <motion.h2 
-              whileHover={{ scale: 1.02 }}
               className="text-4xl md:text-6xl font-extrabold mb-6 drop-shadow-sm cursor-default"
             >
               Ready to accelerate your transition?
@@ -1317,7 +1296,6 @@ const Contact = () => {
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         <div className="text-center mb-16">
           <motion.h2 
-            whileHover={{ scale: 1.02 }}
             className="text-3xl md:text-5xl font-extrabold mb-6 drop-shadow-sm cursor-default"
           >
             Get in <span className="text-gradient">Touch</span>
@@ -1482,9 +1460,9 @@ export default function App() {
   return (
     <div className="min-h-screen selection:bg-fresh/30 relative">
       {/* Fixed Nature Background */}
-      <div className="fixed inset-0 z-[-50] bg-[url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560&auto=format&fit=crop')] bg-cover bg-center" />
+      <div className="fixed inset-0 z-[-50] bg-[url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560&auto=format&fit=crop')] bg-cover bg-center will-change-transform" />
       {/* Soft overlay to maintain readability while keeping nature visible */}
-      <div className="fixed inset-0 z-[-40] bg-earth/65 backdrop-blur-[5px]" />
+      <div className="fixed inset-0 z-[-40] bg-earth/75" />
       
       {/* Floating Particles */}
       <Particles />

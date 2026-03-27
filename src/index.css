@@ -26,6 +26,7 @@ body {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.8);
   box-shadow: 0 8px 32px rgba(27, 94, 32, 0.05);
+  will-change: transform, opacity;
 }
 
 .glass-card {
@@ -34,6 +35,7 @@ body {
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.6);
   box-shadow: 0 4px 24px rgba(27, 94, 32, 0.04);
+  will-change: transform, opacity;
 }
 
 .text-gradient {
@@ -44,6 +46,15 @@ body {
 }
 
 /* Animations */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
+}
+
 @keyframes float-particle {
   0% {
     transform: translateY(110vh) translateX(0) rotate(0deg);
