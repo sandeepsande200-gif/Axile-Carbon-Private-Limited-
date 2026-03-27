@@ -1,0 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-leaf: #E8F5E9;
+  --color-fresh: #66BB6A;
+  --color-forest: #1B5E20;
+  --color-earth: #F1F8E9;
+  --color-sky: #E0F7FA;
+  --color-white: #FFFFFF;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--color-earth);
+  color: var(--color-forest);
+  overflow-x: hidden;
+}
+
+/* Custom Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 32px rgba(27, 94, 32, 0.05);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 24px rgba(27, 94, 32, 0.04);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--color-forest), var(--color-fresh));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Animations */
+@keyframes float-particle {
+  0% {
+    transform: translateY(110vh) translateX(0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: var(--particle-opacity, 0.3);
+  }
+  90% {
+    opacity: var(--particle-opacity, 0.3);
+  }
+  100% {
+    transform: translateY(-10vh) translateX(var(--x-drift, 50px)) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.animate-float-particle {
+  animation: float-particle linear infinite;
+  top: -10vh;
+}
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.animate-blob {
+  animation: blob 15s infinite alternate;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+.bg-animated-gradient {
+  background: linear-gradient(-45deg, var(--color-leaf), var(--color-sky), var(--color-earth), var(--color-white));
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
